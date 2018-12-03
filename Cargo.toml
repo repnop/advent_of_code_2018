@@ -5,3 +5,7 @@ authors = ["Wesley Norris <repnop@outlook.com>"]
 edition = "2018"
 
 [dependencies]
+regex = "1.1.0"
+rayon = "1.0.3"
+aoc-runner = "0.1.0"
+aoc-runner-derive = "0.1.6"

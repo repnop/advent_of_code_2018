@@ -1,8 +1,8 @@
 use std::collections::HashMap;
+use aoc_runner_derive::aoc;
 
-pub fn day_2_part_1() -> u32 {
-    let input = include_str!("../day_inputs/day_2_part_1.txt");
-
+#[aoc(day2, part1)]
+pub fn day_2_part_1(input: &str) -> u32 {
     let mut contains_2 = 0;
     let mut contains_3 = 0;
     let mut letters = HashMap::new();
@@ -27,9 +27,8 @@ pub fn day_2_part_1() -> u32 {
     contains_2 * contains_3
 }
 
-pub fn day_2_part_2() -> String {
-    let input = include_str!("../day_inputs/day_2_part_1.txt");
-
+#[aoc(day2, part2)]
+pub fn day_2_part_2(input: &str) -> String {
     for (i, line) in input.lines().enumerate() {
         for line2 in input.lines().skip(i) {
             if hamming(line, line2) == 1 {

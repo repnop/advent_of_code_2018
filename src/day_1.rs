@@ -1,21 +1,21 @@
 use std::{collections::HashSet, fs};
+use aoc_runner_derive::aoc;
 
-pub fn day_1_part_1() -> isize {
-    let freqs_text = fs::read_to_string("./day_inputs/day_1_part_1.txt").unwrap();
-
-    freqs_text
+#[aoc(day1, part1)]
+pub fn day_1_part_1(input: &str) -> isize {
+    input
         .lines()
         .map(|l| l.parse::<isize>().unwrap())
         .sum()
 }
 
-pub fn day_1_part_2() -> Option<isize> {
-    let freqs_text = fs::read_to_string("./day_inputs/day_1_part_1.txt").unwrap();
+#[aoc(day1, part2)]
+pub fn day_1_part_2(input: &str) -> isize {
     let mut freqs_seen = HashSet::new();
 
     let mut sum = 0;
 
-    for line in freqs_text
+    for line in input
         .lines()
         .map(|l| l.parse::<isize>().unwrap())
         .cycle()
@@ -23,9 +23,9 @@ pub fn day_1_part_2() -> Option<isize> {
         sum += line;
 
         if !freqs_seen.insert(sum) {
-            return Some(sum);
+            return sum;
         }
     }
 
-    None
+    unreachable!()
 }
