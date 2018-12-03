@@ -1,7 +1,6 @@
 use aoc_runner_derive::{aoc, aoc_generator};
 use rayon::prelude::*;
 use regex::Regex;
-use std::collections::HashSet;
 
 pub struct Claim {
     id: u32,
@@ -46,45 +45,84 @@ fn parse_claims(input: &str) -> Vec<Claim> {
     regex
         .captures_iter(input)
         .map(|mtch| Claim {
-            id: mtch.name("id").unwrap().as_str().parse().unwrap(),
-            left_edge: mtch.name("left_edge").unwrap().as_str().parse().unwrap(),
-            top_edge: mtch.name("top_edge").unwrap().as_str().parse().unwrap(),
-            width: mtch.name("width").unwrap().as_str().parse().unwrap(),
-            height: mtch.name("height").unwrap().as_str().parse().unwrap(),
+            id: mtch[1].parse().unwrap(),
+            left_edge: mtch[2].parse().unwrap(),
+            top_edge: mtch[3].parse().unwrap(),
+            width: mtch[4].parse().unwrap(),
+            height: mtch[5].parse().unwrap(),
         })
         .collect()
 }
 
-#[aoc(day3, part1)]
+#[aoc(day3, part1, safe)]
 pub fn day_3_part_1(claims: &[Claim]) -> u32 {
-    let mut two_or_more = 0;
+    let mut inches = [0u8; 1000 * 1000];
 
-    let is_inside = |claim: &Claim, x, y| {
-        claim.top_edge < y
-            && claim.top_edge + claim.height >= y
-            && claim.left_edge < x
-            && claim.left_edge + claim.width >= x
-    };
-
-    for (x, y) in (0..1000)
-        .map(move |x| (0..1000).map(move |y| (x, y)))
-        .flatten()
-    {
-        if claims.iter().filter(|claim| is_inside(claim, x, y)).count() >= 2 {
-            two_or_more += 1;
+    for claim in claims {
+        for x in claim.left()..claim.right() {
+            for y in claim.top()..claim.bottom() {
+                let (x, y) = (x as usize, y as usize);
+                inches[y * 1000 + x] += 1;
+            }
         }
     }
 
-    two_or_more
+    inches.iter().filter(|i| **i >= 2).count() as u32
 }
 
-#[aoc(day3, part2)]
+#[aoc(day3, part1, totally_unsafe)]
+pub fn day_3_part_1_totally_unsafe(claims: &[Claim]) -> u32 {
+    let mut inches = [0u8; 1000 * 1000];
+
+    #[repr(transparent)]
+    struct TotallyUnsafe(*mut u8);
+
+    unsafe impl Sync for TotallyUnsafe {}
+    unsafe impl Send for TotallyUnsafe {}
+    impl std::ops::Deref for TotallyUnsafe {
+        type Target = *mut u8;
+        fn deref(&self) -> &*mut u8 {
+            &self.0
+        }
+    }
+
+    let ptr = TotallyUnsafe(inches.as_mut_ptr());
+
+    claims.par_iter().for_each(|claim| {
+        (claim.top()..claim.bottom()).into_par_iter().for_each(|y| {
+            for x in claim.left()..claim.right() {
+                let (x, y) = (x as isize, y as isize);
+                unsafe {
+                    *ptr.offset(y * 1000 + x) += 1;
+                }
+            }
+        });
+    });
+
+    inches.iter().filter(|i| **i >= 2).count() as u32
+}
+
+#[aoc(day3, part2, with_rayon)]
 pub fn day_3_part_2(claims: &[Claim]) -> u32 {
     claims
         .par_iter()
         .find_any(|claim| {
             claims
                 .par_iter()
+                .filter(|claim2| claim2.id != claim.id)
+                .all(|claim2| !claim.intersects(claim2))
+        })
+        .unwrap()
+        .id
+}
+
+#[aoc(day3, part2, without_rayon)]
+pub fn day_3_part_2_no_rayon(claims: &[Claim]) -> u32 {
+    claims
+        .iter()
+        .find(|claim| {
+            claims
+                .iter()
                 .filter(|claim2| claim2.id != claim.id)
                 .all(|claim2| !claim.intersects(claim2))
         })

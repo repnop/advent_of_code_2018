@@ -1,3 +1,4 @@
+#[allow(unused_macros)]
 macro_rules! dbg {
     ($($var:ident),*) => {
         #[cfg(debug_assertions)]
