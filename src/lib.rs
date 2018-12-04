@@ -9,6 +9,7 @@ macro_rules! dbg {
 mod day_1;
 mod day_2;
 mod day_3;
+mod day_4;
 
 use aoc_runner_derive::aoc_lib;
 
