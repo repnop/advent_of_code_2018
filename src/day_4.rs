@@ -101,8 +101,8 @@ pub fn get_entries(input: &str) -> Vec<Entry> {
 }
 
 fn common_part(input: &[Entry]) -> (HashMap<(u32, u32), u32>, HashMap<u32, u32>) {
-    let mut tracker = HashMap::new();
-    let mut mins_asleep = HashMap::new();
+    let mut tracker = HashMap::with_capacity(input.len());
+    let mut mins_asleep = HashMap::with_capacity(input.len());
     let mut idx = 0;
 
     while idx < input.len() {
