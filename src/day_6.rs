@@ -30,7 +30,7 @@ pub fn generator(input: &str) -> Vec<Point> {
 #[aoc(day6, part1)]
 pub fn day_6_part_1(input: &[Point]) -> usize {
     let mut grid = vec![Point::default(); 1000 * 1000];
-    let mut manhattens = Vec::with_capacity(input.len());
+    let mut manhattans = Vec::with_capacity(input.len());
     let mut areas = vec![0; input.len()];
 
     for i in 0..1_000_000 {
@@ -41,24 +41,24 @@ pub fn day_6_part_1(input: &[Point]) -> usize {
             y: y as i32,
         };
 
-        manhattens.extend(input.iter().map(|point| manhatten(current_point, *point)));
-        manhattens.sort_unstable_by_key(|(_, p)| *p);
+        manhattans.extend(input.iter().map(|point| manhattan(current_point, *point)));
+        manhattans.sort_unstable_by_key(|(_, p)| *p);
 
-        let two_contest = manhattens[0].1 == manhattens[1].1;
+        let two_contest = manhattans[0].1 == manhattans[1].1;
 
         // TODO: optimize not to even need the grid
 
         grid[y * 1000 + x] = if two_contest {
             current_point
         } else {
-            let (name, _) = manhattens[0];
+            let (name, _) = manhattans[0];
             current_point.name = Some(name);
             areas[name as usize] += 1;
 
             current_point
         };
 
-        manhattens.clear();
+        manhattans.clear();
     }
 
     let mut disqualified = Vec::new();
@@ -91,12 +91,27 @@ pub fn day_6_part_1(input: &[Point]) -> usize {
         .unwrap()
 }
 
-fn manhatten(p1: Point, p2: Point) -> (Name, i32) {
+#[aoc(day6, part2)]
+pub fn day_6_part_2(input: &[Point]) -> usize {
+    (0..1000)
+        .map(move |x| (0..1000).map(move |y| (x, y)))
+        .flatten()
+        .map(|(x, y)| {
+            input
+                .iter()
+                .map(|p| manhattan(Point { name: None, x, y }, *p).1)
+                .sum::<i32>() as usize
+        })
+        .filter(|x| *x < 10000)
+        .count()
+}
+
+fn manhattan(p1: Point, p2: Point) -> (Name, i32) {
     (p2.name.unwrap(), (p1.x - p2.x).abs() + (p1.y - p2.y).abs())
 }
 
 #[test]
-fn manhatten_test() {
+fn manhattan_test() {
     let p1 = Point {
         name: None,
         x: 10,
@@ -108,7 +123,7 @@ fn manhatten_test() {
         y: 20,
     };
 
-    assert_eq!(manhatten(p1, p2), (1, 0));
+    assert_eq!(manhattan(p1, p2), (1, 0));
 }
 
 #[test]
@@ -123,7 +138,7 @@ fn smol_test() {
     let points = generator(input);
 
     let mut grid = vec![Point::default(); 10 * 10];
-    let mut manhattens = Vec::with_capacity(input.len());
+    let mut manhattans = Vec::with_capacity(input.len());
     let mut areas = vec![0; points.len()];
 
     for i in 0..100 {
@@ -135,15 +150,15 @@ fn smol_test() {
             y: y as i32,
         };
 
-        manhattens.extend(points.iter().map(|point| manhatten(current_point, *point)));
-        manhattens.sort_unstable_by_key(|(_, p)| *p);
+        manhattans.extend(points.iter().map(|point| manhattan(current_point, *point)));
+        manhattans.sort_unstable_by_key(|(_, p)| *p);
 
-        let two_contest = manhattens[0].1 == manhattens[1].1;
+        let two_contest = manhattans[0].1 == manhattans[1].1;
 
         grid[y * 10 + x] = if two_contest {
             current_point
         } else {
-            let (name, _) = manhattens[0];
+            let (name, _) = manhattans[0];
             areas[name as usize] += 1;
             current_point.name = Some(name);
 
@@ -164,7 +179,7 @@ fn smol_test() {
             println!();
         }*/
 
-        manhattens.clear();
+        manhattans.clear();
     }
 
     let mut disqualified = Vec::new();
