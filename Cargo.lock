@@ -2,11 +2,11 @@
 name = "advent_of_code_2018"
 version = "0.1.0"
 dependencies = [
- "aoc-runner 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "aoc-runner-derive 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
+ "aoc-runner 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "aoc-runner-derive 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "arrayvec 0.4.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "binary-heap-plus 0.1.4 (registry+https://github.com/rust-lang/crates.io-index)",
- "hashbrown 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
+ "hashbrown 0.1.7 (registry+https://github.com/rust-lang/crates.io-index)",
  "petgraph 0.4.13 (registry+https://github.com/rust-lang/crates.io-index)",
  "rayon 1.0.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "regex 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -22,12 +22,12 @@ dependencies = [
 
 [[package]]
 name = "aoc-runner"
-version = "0.1.0"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "aoc-runner-derive"
-version = "0.1.6"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "aoc-runner-internal 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -112,7 +112,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "hashbrown"
-version = "0.1.6"
+version = "0.1.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "byteorder 1.2.7 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -308,8 +308,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [metadata]
 "checksum aho-corasick 0.6.9 (registry+https://github.com/rust-lang/crates.io-index)" = "1e9a933f4e58658d7b12defcf96dc5c720f20832deebe3e0a19efd3b6aaeeb9e"
-"checksum aoc-runner 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "f9582962ee1abe7e86b9e1a6223f1424c9cf436e212f3c657df8300145260fad"
-"checksum aoc-runner-derive 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)" = "c959b6c389e85758c34d531ced5f548a4e8753438ebe1a048d3845b4db40788c"
+"checksum aoc-runner 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)" = "c2e33c102c9671af73579913168ad1eb340d1992858440538562984b9810fef3"
+"checksum aoc-runner-derive 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)" = "71eea144ee139edd5fecdf8fe2b7f0e9f7736d722bb71dda08b0522426eb9e19"
 "checksum aoc-runner-internal 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "274b0ba7f3669a45ec0aaacf94eb032a749de880ab776091576cca94037c9982"
 "checksum arrayvec 0.4.8 (registry+https://github.com/rust-lang/crates.io-index)" = "f405cc4c21cd8b784f6c8fc2adf9bc00f59558f0049b5ec21517f875963040cc"
 "checksum binary-heap-plus 0.1.4 (registry+https://github.com/rust-lang/crates.io-index)" = "f9adb1b5abc665241ec0f3c35c8a8e2d12f71579d2b1496dcbb5b6ea4208ba6c"
@@ -320,7 +320,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum crossbeam-utils 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)" = "2760899e32a1d58d5abb31129f8fae5de75220bc2176e77ff7c627ae45c918d9"
 "checksum either 1.5.0 (registry+https://github.com/rust-lang/crates.io-index)" = "3be565ca5c557d7f59e7cfcf1844f9e3033650c929c6566f511e8005f205c1d0"
 "checksum fixedbitset 0.1.9 (registry+https://github.com/rust-lang/crates.io-index)" = "86d4de0081402f5e88cdac65c8dcdcc73118c1a7a465e2a05f0da05843a8ea33"
-"checksum hashbrown 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)" = "72d9de4ebc5b184289fc3db3a3c023b072e56c649e32fcfcd434636e7ba912d4"
+"checksum hashbrown 0.1.7 (registry+https://github.com/rust-lang/crates.io-index)" = "64b7d419d0622ae02fe5da6b9a5e1964b610a65bb37923b976aeebb6dbb8f86e"
 "checksum itoa 0.4.3 (registry+https://github.com/rust-lang/crates.io-index)" = "1306f3464951f30e30d12373d31c79fbd52d236e5e896fd92f96ec7babbbe60b"
 "checksum lazy_static 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)" = "a374c89b9db55895453a74c1e38861d9deec0b01b405a82516e9d5de4820dea1"
 "checksum libc 0.2.44 (registry+https://github.com/rust-lang/crates.io-index)" = "10923947f84a519a45c8fefb7dd1b3e8c08747993381adee176d7a82b4195311"
