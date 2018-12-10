@@ -1,6 +1,3 @@
-#![cfg_attr(test, allow(dead_code))]
-#![cfg_attr(test, allow(unused_variables))]
-
 use aoc_runner_derive::aoc;
 use std::ptr::NonNull;
 
@@ -84,10 +81,32 @@ fn insert_clock_wise(c: &mut Circle, positions_clockwise: usize, marble_num: u32
     c.current_pos = pos;
 }
 
-#[derive(Debug, Default)]
+#[derive(Default)]
 struct Circle2 {
     backing: LinkedList,
-    current_pos: NonNull<Node>,
+    current_pos: Option<NonNull<Node>>,
+}
+
+impl std::fmt::Debug for Circle2 {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        let mut curr_node = self.head;
+
+        write!(f, "[")?;
+        while curr_node.is_some() {
+            unsafe {
+                if curr_node == self.current_pos {
+                    write!(f, "({}), ", curr_node.unwrap().as_ref().value)?;
+                } else {
+                    write!(f, "{}, ", curr_node.unwrap().as_ref().value)?;
+                }
+
+                curr_node = curr_node.unwrap().as_ref().next;
+            }
+        }
+        write!(f, "]")?;
+
+        Ok(())
+    }
 }
 
 impl std::ops::Deref for Circle2 {
@@ -104,6 +123,16 @@ impl std::ops::DerefMut for Circle2 {
     }
 }
 
+// Through me you pass into the city of woe: 
+// Through me you pass into eternal pain: 
+// Through me among the people lost for aye. 
+// Justice the founder of my fabric moved: 
+// To rear me was the task of Power divine,        
+// Supremest Wisdom, and primeval Love.
+// Before me things create were none, save things 
+// Eternal, and eternal I endure. 
+// Abandon all hope, ye who enter here.
+
 #[derive(Default)]
 struct LinkedList {
     len: usize,
@@ -111,6 +140,7 @@ struct LinkedList {
     tail: Option<NonNull<Node>>,
 }
 
+#[derive(Debug)]
 struct Node {
     prev: Option<NonNull<Node>>,
     next: Option<NonNull<Node>>,
@@ -118,6 +148,7 @@ struct Node {
 }
 
 impl LinkedList {
+    #[allow(dead_code)]
     fn new() -> LinkedList {
         Self::default()
     }
@@ -133,6 +164,9 @@ impl LinkedList {
 
         if self.tail.is_none() {
             self.tail = Some(ptr);
+            unsafe {
+                self.head.unwrap().as_mut().next = self.tail;
+            }
         } else {
             unsafe {
                 ptr.as_mut().prev = self.tail;
@@ -166,23 +200,49 @@ impl LinkedList {
         self.head.unwrap()
     }
 
-    fn push_after(&mut self, after: NonNull<Node>, value: u32) -> NonNull<Node> {
+    fn push_after(&mut self, mut after: NonNull<Node>, value: u32) -> NonNull<Node> {
         unsafe {
-            if after.as_mut().next.is_none() {
-                self.push_back(value)
-            } else if after.as_mut().prev.is_none() {
-                self.push_front(value)
+            if after.as_ref().next.is_none() {
+                self.push_back(value);
             } else {
                 self.len += 1;
-                let mut ptr = NonNull::new(Box::into_raw(Box::new(Node {
-                    prev: after.as_mut().prev,
-                    next: after.as_mut().next,
+                let ptr = NonNull::new(Box::into_raw(Box::new(Node {
+                    prev: Some(after),
+                    next: after.as_ref().next,
                     value,
                 })))
                 .unwrap();
 
-                after.as_mut().prev.unwrap().as_mut().next = Some(ptr);
-                after.as_mut().next.unwrap().as_mut().prev = Some(ptr);
+                if after.as_ref().next.is_some() {
+                    after.as_ref().next.unwrap().as_mut().prev = Some(ptr);
+                }
+                after.as_mut().next = Some(ptr);
+
+                //ptr
+            }
+        }
+
+        after
+    }
+
+    #[allow(dead_code)]
+    fn push_before(&mut self, mut after: NonNull<Node>, value: u32) -> NonNull<Node> {
+        unsafe {
+            if after.as_ref().next.is_none() {
+                self.push_back(value)
+            } else if after.as_ref().prev.is_none() {
+                self.push_front(value)
+            } else {
+                self.len += 1;
+                let ptr = NonNull::new(Box::into_raw(Box::new(Node {
+                    prev: after.as_ref().prev,
+                    next: Some(after),
+                    value,
+                })))
+                .unwrap();
+
+                after.as_ref().prev.unwrap().as_mut().next = Some(ptr);
+                after.as_mut().prev = Some(ptr);
 
                 ptr
             }
@@ -191,17 +251,17 @@ impl LinkedList {
 
     fn remove(&mut self, node: NonNull<Node>) -> Option<u32> {
         unsafe {
-            if node.as_mut().prev.is_none() {
+            if node.as_ref().prev.is_none() {
                 self.pop_front()
-            } else if node.as_mut().next.is_none() {
+            } else if node.as_ref().next.is_none() {
                 self.pop_back()
             } else {
-                let ptr = node.as_mut().next;
-                let ptr2 = node.as_mut().prev;
+                let ptr = node.as_ref().next;
+                let ptr2 = node.as_ref().prev;
 
                 ptr.unwrap().as_mut().prev = ptr2;
                 ptr2.unwrap().as_mut().next = ptr;
-                let ret = node.as_mut().value;
+                let ret = node.as_ref().value;
 
                 Box::from_raw(node.as_ptr());
                 Some(ret)
@@ -211,11 +271,9 @@ impl LinkedList {
 
     fn pop_back(&mut self) -> Option<u32> {
         if self.tail.is_none() {
-            if self.head.is_none() {
-                None
-            } else {
-                let ptr = self.head.unwrap();
-                let ret = ptr.as_mut().value;
+            unsafe {
+                let ptr = self.head?;
+                let ret = ptr.as_ref().value;
                 self.head = None;
 
                 Box::from_raw(ptr.as_ptr());
@@ -223,24 +281,25 @@ impl LinkedList {
                 Some(ret)
             }
         } else {
-            self.tail.unwrap().as_mut().prev.unwrap().as_mut().next = None;
-            let ptr = self.tail.unwrap();
-            self.tail = self.tail.unwrap().as_mut().prev;
+            unsafe {
+                let mut tail_prev = self.tail.unwrap().as_mut().prev?;
+                tail_prev.as_mut().next = None;
+                let ptr = self.tail.unwrap();
+                self.tail = self.tail.unwrap().as_mut().prev;
 
-            let ret = ptr.as_mut().value;
-            Box::from_raw(ptr.as_ptr());
+                let ret = ptr.as_ref().value;
+                Box::from_raw(ptr.as_ptr());
 
-            Some(ret)
+                Some(ret)
+            }
         }
     }
 
     fn pop_front(&mut self) -> Option<u32> {
         if self.head.is_none() {
-            if self.tail.is_none() {
-                None
-            } else {
-                let ptr = self.tail.unwrap();
-                let ret = ptr.as_mut().value;
+            unsafe {
+                let ptr = self.tail?;
+                let ret = ptr.as_ref().value;
                 self.tail = None;
 
                 Box::from_raw(ptr.as_ptr());
@@ -248,17 +307,23 @@ impl LinkedList {
                 Some(ret)
             }
         } else {
-            self.head.unwrap().as_mut().next.unwrap().as_mut().prev = None;
-            let ptr = self.head.unwrap();
-            self.head = self.head.unwrap().as_mut().next;
+            unsafe {
+                let ptr = self.head.unwrap();
 
-            let ret = ptr.as_mut().value;
-            Box::from_raw(ptr.as_ptr());
+                if let Some(mut head_next) = self.head.unwrap().as_ref().next {
+                    head_next.as_mut().prev = None;
+                    self.head = self.head.unwrap().as_ref().next;
+                }
 
-            Some(ret)
+                let ret = ptr.as_ref().value;
+                Box::from_raw(ptr.as_ptr());
+
+                Some(ret)
+            }
         }
     }
 
+    #[allow(dead_code)]
     fn len(&self) -> usize {
         self.len
     }
@@ -292,8 +357,8 @@ pub fn day_9_part_2(input: &str) -> u32 {
     let mut current_player = 0;
     let mut marble_nums = 1..;
     let mut circle = Circle2::default();
-
     circle.push_front(0);
+    circle.current_pos = circle.head;
 
     while marble_count > 0 {
         let curr_num = marble_nums.next().unwrap();
@@ -301,17 +366,19 @@ pub fn day_9_part_2(input: &str) -> u32 {
         if curr_num % 23 == 0 {
             players[current_player] += curr_num;
             for _ in 0..6 {
-                if circle.current_pos == 0 {
-                    circle.current_pos = circle.len() - 1;
-                } else {
-                    circle.current_pos -= 1;
+                unsafe {
+                    if circle.current_pos.unwrap().as_ref().prev.is_none() {
+                        circle.current_pos = circle.tail;
+                    } else {
+                        circle.current_pos = circle.current_pos.unwrap().as_ref().prev;
+                    }
                 }
             }
             let seven_ccw = circle.current_pos;
-            let mut foo = circle.split_off(seven_ccw);
-            players[current_player] += foo.pop_back().unwrap();
-            circle.append(&mut foo);
-            circle.current_pos -= 1;
+            unsafe {
+                circle.current_pos = circle.current_pos.unwrap().as_ref().prev;
+            }
+            players[current_player] += circle.remove(seven_ccw.unwrap()).unwrap();
         } else {
             insert_clock_wise2(&mut circle, 2, curr_num);
         }
@@ -328,12 +395,20 @@ pub fn day_9_part_2(input: &str) -> u32 {
     players.into_iter().max().unwrap()
 }
 
-fn insert_clock_wise2(c: &mut Circle2, positions_clockwise: usize, marble_num: u32) {
-    let pos = (c.current_pos + positions_clockwise) % c.len();
-    let mut foo = c.split_off(pos + 1);
-    foo.push_back(marble_num);
-    c.append(&mut foo);
-    c.current_pos = pos;
+fn insert_clock_wise2(circle: &mut Circle2, positions_clockwise: usize, marble_num: u32) {
+    for _ in 0..positions_clockwise {
+        unsafe {
+            if circle.current_pos.unwrap().as_ref().next.is_none() {
+                circle.current_pos = circle.head;
+            } else {
+                circle.current_pos = circle.current_pos.unwrap().as_ref().next;
+            }
+        }
+    }
+
+    let node = circle.current_pos.unwrap();
+
+    circle.current_pos = Some(circle.push_after(node, marble_num));
 }
 
 #[test]
