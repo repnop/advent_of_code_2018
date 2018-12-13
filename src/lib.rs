@@ -17,6 +17,7 @@ mod day_09;
 mod day_10;
 mod day_11;
 mod day_12;
+mod day_13;
 
 use aoc_runner_derive::aoc_lib;
 

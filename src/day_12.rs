@@ -1,5 +1,4 @@
 use aoc_runner_derive::aoc;
-use hashbrown::HashMap;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum PlantState {
